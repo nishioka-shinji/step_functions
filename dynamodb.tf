@@ -65,15 +65,15 @@ resource "aws_appautoscaling_policy" "dynamodb_table_write_policy" {
 resource "aws_dynamodb_table_item" "items" {
   for_each = {
     item1 = {
-      index = "0001"
+      index     = "0001"
       something = "説明0001"
     }
     item2 = {
-      index = "0002"
+      index     = "0002"
       something = "説明0002"
     }
   }
-  
+
   table_name = aws_dynamodb_table.basic-dynamodb-table.name
   hash_key   = aws_dynamodb_table.basic-dynamodb-table.hash_key
 
