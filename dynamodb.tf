@@ -80,7 +80,7 @@ resource "aws_dynamodb_table_item" "items" {
   item = <<EOF
 {
   "${aws_dynamodb_table.basic-dynamodb-table.hash_key}": {"S": "${each.value.index}"},
-  "detail": {"S": "${each.value.something}"}
+  "Detail": {"S": "${each.value.something}"}
 }
 EOF
 }

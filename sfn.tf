@@ -26,13 +26,40 @@ resource "aws_sfn_state_machine" "sfn_state_machine" {
         {
           "Variable": "$.Item",
           "IsPresent": true,
-          "Next": "Success"
+          "Next": "Parallel"
         }
       ],
       "Default": "Fail"
     },
-    "Success": {
-      "Type": "Succeed"
+    "Parallel": {
+      "Type": "Parallel",
+      "End": true,
+      "Branches": [
+        {
+          "StartAt": "TranslateText",
+          "States": {
+            "TranslateText": {
+              "Type": "Task",
+              "End": true,
+              "Parameters": {
+                "SourceLanguageCode": "ja",
+                "TargetLanguageCode": "en",
+                "Text.$": "$.Item.Detail.S"
+              },
+              "Resource": "arn:aws:states:::aws-sdk:translate:translateText"
+            }
+          }
+        },
+        {
+          "StartAt": "Pass",
+          "States": {
+            "Pass": {
+              "Type": "Pass",
+              "End": true
+            }
+          }
+        }
+      ]
     },
     "Fail": {
       "Type": "Fail"
