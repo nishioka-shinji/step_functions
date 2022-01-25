@@ -5,11 +5,37 @@ resource "aws_sfn_state_machine" "sfn_state_machine" {
   definition = <<EOF
 {
   "Comment": "A description of my state machine",
-  "StartAt": "Pass",
+  "StartAt": "DynamoDB GetItem",
   "States": {
-    "Pass": {
-      "Type": "Pass",
-      "End": true
+    "DynamoDB GetItem": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::aws-sdk:dynamodb:getItem",
+      "Parameters": {
+        "TableName": "Article",
+        "Key": {
+          "ArticleID": {
+            "S.$": "$.ArticleID"
+          }
+        }
+      },
+      "Next": "Choice - Item is present"
+    },
+    "Choice - Item is present": {
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Variable": "$.Item",
+          "IsPresent": true,
+          "Next": "Success"
+        }
+      ],
+      "Default": "Fail"
+    },
+    "Success": {
+      "Type": "Succeed"
+    },
+    "Fail": {
+      "Type": "Fail"
     }
   },
   "TimeoutSeconds": 30
