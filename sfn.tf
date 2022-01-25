@@ -40,13 +40,33 @@ resource "aws_sfn_state_machine" "sfn_state_machine" {
           "States": {
             "TranslateText": {
               "Type": "Task",
-              "End": true,
               "Parameters": {
                 "SourceLanguageCode": "ja",
                 "TargetLanguageCode": "en",
                 "Text.$": "$.Item.Detail.S"
               },
-              "Resource": "arn:aws:states:::aws-sdk:translate:translateText"
+              "Resource": "arn:aws:states:::aws-sdk:translate:translateText",
+              "Next": "DynamoDB UpdateItem - EnglishVersion",
+              "ResultPath": "$.Result"
+            },
+            "DynamoDB UpdateItem - EnglishVersion": {
+              "Type": "Task",
+              "Resource": "arn:aws:states:::aws-sdk:dynamodb:updateItem",
+              "Parameters": {
+                "TableName": "Article",
+                "Key": {
+                  "ArticleID": {
+                    "S.$": "$.Item.ArticleID.S"
+                  }
+                },
+                "UpdateExpression": "SET EnglishVersion = :EnglishVersionRef",
+                "ExpressionAttributeValues": {
+                  ":EnglishVersionRef": {
+                    "S.$": "$.Result.TranslatedText"
+                  }
+                }
+              },
+              "End": true
             }
           }
         },
